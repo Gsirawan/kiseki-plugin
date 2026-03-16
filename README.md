@@ -4,7 +4,7 @@
 
 Kiseki is a plugin that gives [OpenCode](https://github.com/opencode-ai/opencode) AI assistants **persistent identity**, **real-time awareness**, and **cultural context**. It injects identity files, time awareness (including the Islamic/Hijri calendar), configurable reminders, and session continuity into your AI assistant, all via OpenCode's plugin system.
 
-Your AI starts every session knowing *who it is* and *when it is*.
+Your AI starts every session knowing *who it is* and *when it is*. Time context and reminders update with **every message**, not just at session start - so if a conversation spans afternoon to evening, the AI knows.
 
 ## Features
 
@@ -14,7 +14,7 @@ Auto-injects identity and context files into every system prompt. Define a list 
 
 ### Time Context
 
-Injects the current date, time, period of day (morning/afternoon/evening/night/late night), Hijri (Islamic) calendar date, and seasonal flags into the system prompt. The AI always knows *when* it is - no more "I don't have access to the current time."
+Injects the current date, time, period of day (morning/afternoon/evening/night/late night), Hijri (Islamic) calendar date, and seasonal flags into the system prompt. Updates on **every message**, not just session start - if a conversation runs from afternoon into evening, the time context reflects that in real time. No more "I don't have access to the current time."
 
 Includes:
 - **Hijri date** - the Islamic calendar date (e.g., "Islamic date: 24 Ramadan 1447 AH") calculated using the Kuwaiti/tabular algorithm. Accuracy is +/-1 day, which is appropriate since Muslims determine actual dates by moon sighting.
@@ -22,7 +22,7 @@ Includes:
 
 ### Dynamic Reminders
 
-Injects configurable reminder lines from a markdown file into the time context block. The file is watched for changes in real-time using a layered refresh strategy:
+Injects configurable reminder lines from a markdown file into the time context block. Edit the file mid-conversation and the next message picks up the changes. The file is watched using a layered refresh strategy:
 
 1. **`fs.watch`** - instant invalidation on file change (fast path)
 2. **10-second polling** - periodic stat check as a fallback if the watcher silently drops events
