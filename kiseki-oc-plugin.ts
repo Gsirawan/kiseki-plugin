@@ -1,14 +1,12 @@
 import type { Plugin } from "@opencode-ai/plugin";
-import { readFileSync, readdirSync, existsSync, statSync, watch } from "fs";
+import { readFileSync, statSync, watch } from "fs";
 import type { FSWatcher } from "fs";
 import { join } from "path";
 
 interface KisekiConfig {
   foundation_paths?: string[];
-  agent_mail_dir?: string;
   enabled: {
     foundation: boolean;
-    agent_mail: boolean;
     session_briefing: boolean;
     time_context: boolean;
   };
@@ -265,38 +263,6 @@ const readFoundationFiles = (paths: string[]): string => {
   return contents.join("\n\n---\n\n");
 };
 
-const checkAgentMail = (
-  mailDir: string,
-): { count: number; preview: string } => {
-  try {
-    if (!existsSync(mailDir)) return { count: 0, preview: "" };
-
-    const files = readdirSync(mailDir).filter((f) => f.endsWith(".json"));
-    let unreadCount = 0;
-    let preview = "";
-
-    for (const file of files) {
-      try {
-        const msg = JSON.parse(readFileSync(join(mailDir, file), "utf-8"));
-        if (!msg.read) {
-          unreadCount++;
-          if (!preview && msg.message) {
-            preview =
-              msg.message.slice(0, 100) +
-              (msg.message.length > 100 ? "..." : "");
-          }
-        }
-      } catch {
-        // Skip invalid files
-      }
-    }
-
-    return { count: unreadCount, preview };
-  } catch {
-    return { count: 0, preview: "" };
-  }
-};
-
 /**
  * Extract a concise summary from session messages for the scribe agent.
  * Pulls out user requests, assistant decisions, tool usage, and key outcomes.
@@ -510,7 +476,6 @@ export const KisekiPlugin: Plugin = async ({ client, $, directory }) => {
   }
 
   let foundationCache: string | null = null;
-  let sessionNotified = false;
 
   const log = async (message: string, extra?: Record<string, any>) => {
     await client.app.log({
@@ -525,22 +490,6 @@ export const KisekiPlugin: Plugin = async ({ client, $, directory }) => {
 
   return {
     event: async ({ event }) => {
-      // Agent mail toast on session start
-      if (event.type === "session.created" && config.enabled.agent_mail && config.agent_mail_dir) {
-        const mail = checkAgentMail(config.agent_mail_dir);
-        if (mail.count > 0) {
-          await client.tui.toast.show({
-            body: {
-              title: `\u{1F4EC} Agent Mail: ${mail.count} message(s)`,
-              message: mail.preview || "Check your mail!",
-              type: "info",
-            },
-          });
-          await log("Agent mail notification shown", { count: mail.count });
-        }
-        sessionNotified = true;
-      }
-
       // Session briefing on compaction - fire-and-forget scribe agent flow
       if (
         event.type === "session.compacted" &&
@@ -686,18 +635,6 @@ ${foundationCache}
             error: err instanceof Error ? err.message : String(err),
           });
         }
-      }
-
-      if (config.enabled.agent_mail && config.agent_mail_dir && !sessionNotified) {
-        const mail = checkAgentMail(config.agent_mail_dir);
-        if (mail.count > 0) {
-          output.system.push(`
-<!-- AGENT MAIL NOTIFICATION -->
-\u{1F4EC} You have ${mail.count} unread message(s)! Call the receive tool to read them.
-<!-- END AGENT MAIL -->
-`);
-        }
-        sessionNotified = true;
       }
     },
 

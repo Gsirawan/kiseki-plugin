@@ -3,10 +3,8 @@
     "/path/to/your/foundation.md",
     "/path/to/your/identity.md"
   ],
-  "agent_mail_dir": "/path/to/your/mail/inbox",
   "enabled": {
     "foundation": true,
-    "agent_mail": true,
     "session_briefing": true,
     "time_context": true
   },

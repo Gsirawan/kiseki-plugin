@@ -2,7 +2,7 @@
 
 ## What is Kiseki?
 
-Kiseki is a plugin that gives [OpenCode](https://github.com/opencode-ai/opencode) AI assistants **persistent identity**, **real-time awareness**, and **cultural context**. It injects identity files, time awareness (including the Islamic/Hijri calendar), cross-agent messaging, configurable reminders, and session continuity into your AI assistant, all via OpenCode's plugin system.
+Kiseki is a plugin that gives [OpenCode](https://github.com/opencode-ai/opencode) AI assistants **persistent identity**, **real-time awareness**, and **cultural context**. It injects identity files, time awareness (including the Islamic/Hijri calendar), configurable reminders, and session continuity into your AI assistant, all via OpenCode's plugin system.
 
 Your AI starts every session knowing *who it is* and *when it is*.
 
@@ -44,10 +44,6 @@ Plain text lines work too
 - Markdown bullet prefixes (`- ` or `* `) are automatically stripped
 - Plain text lines are included as-is
 - If the file is missing, empty, or unreadable, a default message is shown
-
-### Agent Mail
-
-Cross-agent message notification system. On session start, a toast notification shows unread message count and a preview. A system prompt nudge reminds the AI to check mail if messages are waiting. Designed for multi-agent setups where agents need to communicate across sessions.
 
 ### Session Briefing
 
@@ -99,13 +95,9 @@ The plugin reads `.opencode/kiseki.json` from your project root. All fields:
     "/path/to/your/identity.md"
   ],
 
-  // Directory containing cross-agent JSON message files
-  "agent_mail_dir": "/path/to/your/mail/inbox",
-
   // Feature toggles - enable/disable individually
   "enabled": {
     "foundation": true,       // Inject foundation files into system prompt
-    "agent_mail": true,       // Show mail notifications + system prompt nudge
     "session_briefing": true, // Fire scribe agent on session compaction
     "time_context": true      // Inject current time into system prompt
   },
@@ -133,9 +125,7 @@ The plugin reads `.opencode/kiseki.json` from your project root. All fields:
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `foundation_paths` | `string[]` | No | Array of absolute file paths to inject as system context. Files are read once and cached for the session. Missing files are silently skipped. |
-| `agent_mail_dir` | `string` | No | Directory containing `.json` message files. Each file should have `{ "message": "...", "read": false }` structure. |
 | `enabled.foundation` | `boolean` | Yes | Toggle foundation file injection. |
-| `enabled.agent_mail` | `boolean` | Yes | Toggle agent mail notifications and system prompt nudge. |
 | `enabled.session_briefing` | `boolean` | Yes | Toggle session briefing on compaction. |
 | `enabled.time_context` | `boolean` | Yes | Toggle time context injection. |
 | `briefing.agent` | `string` | If briefing enabled | Name of the OpenCode agent to use for briefing updates. |
@@ -194,8 +184,8 @@ The Ramadan ranges are hardcoded approximations. Add future years by extending t
 
 The plugin hooks into three OpenCode extension points:
 
-1. **`event`** - Listens for `session.created` (mail toast) and `session.compacted` (briefing trigger)
-2. **`experimental.chat.system.transform`** - Appends foundation, time context, and mail nudge to the system prompt
+1. **`event`** - Listens for `session.compacted` (briefing trigger)
+2. **`experimental.chat.system.transform`** - Appends foundation and time context to the system prompt
 3. **`experimental.session.compacting`** - Injects preservation instructions into the compaction context
 
 ### Session Briefing Flow
@@ -215,7 +205,6 @@ The briefing update is fire-and-forget - it runs asynchronously and does not blo
 
 - [OpenCode](https://github.com/opencode-ai/opencode) with plugin support
 - Node.js runtime (for `Intl.DateTimeFormat` timezone support)
-- For agent mail: a shared directory accessible by all participating agents
 - For session briefing: a configured OpenCode agent capable of file editing
 
 ## License
