@@ -1,0 +1,26 @@
+{
+  "name": "kiseki-opencode-plugin",
+  "version": "1.0.0",
+  "description": "OpenCode plugin for persistent identity, time awareness, cultural calendar, cross-agent messaging, and session continuity",
+  "main": "kiseki-oc-plugin.ts",
+  "type": "module",
+  "keywords": [
+    "opencode",
+    "plugin",
+    "ai",
+    "identity",
+    "hijri",
+    "islamic-calendar",
+    "time-awareness",
+    "session-continuity"
+  ],
+  "author": "Ghaith Sirawan",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gsirawan/kiseki-plugin.git"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
