@@ -6,7 +6,16 @@
 
 set -euo pipefail
 
-CONFIG_PATH="${PWD}/.claude/kiseki.json"
+# Read stdin (CC passes session context as JSON)
+STDIN_DATA=$(cat)
+
+# Extract CWD from hook input — fall back to PWD if not present
+HOOK_CWD=$(echo "$STDIN_DATA" | jq -r '.cwd // empty' 2>/dev/null || true)
+if [ -z "$HOOK_CWD" ]; then
+  HOOK_CWD="${PWD}"
+fi
+
+CONFIG_PATH="${HOOK_CWD}/.claude/kiseki.json"
 
 # If no config, this project has kiseki disabled — output nothing meaningful and exit.
 if [ ! -f "$CONFIG_PATH" ]; then

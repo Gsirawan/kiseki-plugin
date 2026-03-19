@@ -11,7 +11,16 @@
 
 set -euo pipefail
 
-CONFIG_PATH="${PWD}/.claude/kiseki.json"
+# Read stdin (CC passes session context as JSON)
+STDIN_DATA=$(cat)
+
+# Extract CWD from hook input — fall back to PWD if not present
+HOOK_CWD=$(echo "$STDIN_DATA" | jq -r '.cwd // empty' 2>/dev/null || true)
+if [ -z "$HOOK_CWD" ]; then
+  HOOK_CWD="${PWD}"
+fi
+
+CONFIG_PATH="${HOOK_CWD}/.claude/kiseki.json"
 
 if [ ! -f "$CONFIG_PATH" ]; then
   echo '{}'
@@ -110,8 +119,8 @@ if [ -n "$REMINDERS_RAW" ]; then
   elif [[ "$REMINDERS_RAW" == "~" ]]; then
     REMINDERS_PATH="$HOME"
   elif [[ "$REMINDERS_RAW" == "./"* ]] || [[ "$REMINDERS_RAW" != "/"* ]]; then
-    # Relative path — resolve against CWD
-    REMINDERS_PATH="${PWD}/${REMINDERS_RAW#./}"
+    # Relative path — resolve against hook CWD
+    REMINDERS_PATH="${HOOK_CWD}/${REMINDERS_RAW#./}"
   else
     REMINDERS_PATH="$REMINDERS_RAW"
   fi
