@@ -1,0 +1,9 @@
+{
+  "name": "kiseki",
+  "description": "Persistent identity, real-time awareness, and cultural context for Claude Code agents.",
+  "version": "1.0.0",
+  "author": { "name": "Ghaith Sirawan" },
+  "homepage": "https://github.com/Gsirawan/kiseki-plugin",
+  "repository": "https://github.com/Gsirawan/kiseki-plugin",
+  "license": "MIT"
+}
