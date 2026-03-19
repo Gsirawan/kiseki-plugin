@@ -61,6 +61,39 @@ while IFS= read -r raw_path; do
 
 done <<< "$PATHS"
 
+# --- Agent mail check ---
+# Reads mail_dir and mail_identity from config. Scans for unread messages.
+MAIL_DIR=$(echo "$CONFIG" | jq -r '.mail_dir // empty' 2>/dev/null || true)
+MAIL_IDENTITY=$(echo "$CONFIG" | jq -r '.mail_identity // empty' 2>/dev/null || true)
+
+if [ -n "$MAIL_DIR" ] && [ -n "$MAIL_IDENTITY" ] && [ -d "$MAIL_DIR" ]; then
+  # Expand ~ in MAIL_DIR
+  if [[ "$MAIL_DIR" == "~/"* ]]; then
+    MAIL_DIR="${HOME}/${MAIL_DIR:2}"
+  fi
+
+  # Find inbox: <peer>_to_<identity> directories
+  UNREAD_MSGS=""
+  for inbox in "$MAIL_DIR"/*_to_"$MAIL_IDENTITY"/; do
+    [ -d "$inbox" ] || continue
+    for msg_file in "$inbox"*.json; do
+      [ -f "$msg_file" ] || continue
+      # Check if unread
+      is_read=$(jq -r '.read // false' "$msg_file" 2>/dev/null || echo "true")
+      if [ "$is_read" = "false" ]; then
+        from=$(jq -r '.from // "unknown"' "$msg_file" 2>/dev/null)
+        message=$(jq -r '.message // ""' "$msg_file" 2>/dev/null)
+        ts=$(jq -r '.timestamp // ""' "$msg_file" 2>/dev/null)
+        UNREAD_MSGS+="📬 From ${from} (${ts}):"$'\n'"${message}"$'\n\n'
+      fi
+    done
+  done
+
+  if [ -n "$UNREAD_MSGS" ]; then
+    CONTEXT+=$'\n\n---\n\n'"<!-- AGENT MAIL: UNREAD MESSAGES -->"$'\n'"${UNREAD_MSGS}"
+  fi
+fi
+
 if [ -z "$CONTEXT" ]; then
   echo '{}'
   exit 0
