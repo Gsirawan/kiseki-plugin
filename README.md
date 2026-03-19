@@ -72,14 +72,29 @@ See the `opencode/` directory for full OpenCode configuration reference.
 git clone https://github.com/Gsirawan/kiseki-plugin.git
 ```
 
-Add to `~/.claude/settings.json`:
+Add the plugin and the `UserPromptSubmit` hook to `~/.claude/settings.json`:
+
 ```json
 {
   "pluginDirs": [
     "/path/to/kiseki-plugin/claudecode"
-  ]
+  ],
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/path/to/kiseki-plugin/claudecode/scripts/user-prompt.sh"
+          }
+        ]
+      }
+    ]
+  }
 }
 ```
+
+> **Note:** The `UserPromptSubmit` hook must be registered in `settings.json` directly (with an absolute path), not in the plugin's `hooks.json`. Claude Code only fires `SessionStart` and `PreCompact` from `pluginDirs` plugins. The `SessionStart` and `PreCompact` hooks are handled by the plugin automatically.
 
 ### 2. Create project config
 
@@ -108,11 +123,11 @@ If the config file is absent, the plugin does nothing (safe for projects that do
 
 ### Claude Code Hooks
 
-| Hook | When | What |
-|------|------|------|
-| `SessionStart` | Once, at session start | Injects foundation files as system context |
-| `UserPromptSubmit` | Every message you send | Injects fresh time context, Hijri date, Ramadan flag, and reminders |
-| `PreCompact` | Before context compaction | Instructs the model to preserve identity and relational context |
+| Hook | When | Registered In | What |
+|------|------|---------------|------|
+| `SessionStart` | Once, at session start | Plugin `hooks.json` | Injects foundation files as system context |
+| `UserPromptSubmit` | Every message you send | `settings.json` (required) | Injects fresh time context, Hijri date, Ramadan flag, and reminders |
+| `PreCompact` | Before context compaction | Plugin `hooks.json` | Instructs the model to preserve identity and relational context |
 
 ## Time Context
 
