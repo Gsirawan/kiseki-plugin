@@ -13,8 +13,6 @@ Your AI starts every session knowing *who it is* and *when it is*. Time context 
 | Hijri/Islamic calendar | Kuwaiti algorithm | Kuwaiti algorithm (bash) |
 | Ramadan detection | Date ranges | Algorithmic (from Hijri month) |
 | Dynamic reminders | File watcher + polling | Read on each message |
-| Compaction preservation | Identity context | Identity context |
-| Session briefing (scribe) | Ephemeral session | Not supported (use external tools) |
 
 ## Repository Structure
 
