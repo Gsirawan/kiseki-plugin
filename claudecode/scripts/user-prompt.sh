@@ -22,6 +22,14 @@ fi
 
 CONFIG_PATH="${HOOK_CWD}/.claude/kiseki.json"
 
+# Fall back to the user-global config, so every session gets time context and
+# not only projects that happen to carry their own kiseki.json. A per-project
+# file still wins, which is what makes a different timezone per project
+# possible at all.
+if [ ! -f "$CONFIG_PATH" ]; then
+  CONFIG_PATH="${HOME}/.claude/kiseki.json"
+fi
+
 if [ ! -f "$CONFIG_PATH" ]; then
   echo '{}'
   exit 0
